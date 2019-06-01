@@ -6,7 +6,21 @@ const roomSchema = mongoose.Schema({
   rent: Number,
   water_rate:Number,
   electricity_rate:Number,
-  occupied:Boolean,
+  occupied: {
+    status: {
+           type: Boolean,
+         },
+    tenant: {
+        name:{
+          type: String,
+          default: null
+        },
+        start:{
+          type: String,
+          default: null
+        },
+     },
+  }
 })
 
 module.exports = mongoose.model('Room', roomSchema)

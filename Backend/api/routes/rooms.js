@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken')
 
 
 router.get('/', (req,res,next) => {
-
   Room.find().sort({ name:1})
   .then(result => {
     console.log(result)

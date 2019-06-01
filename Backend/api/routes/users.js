@@ -5,31 +5,29 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user')
+const Room = require('../models/room')
+
 
 
 
 router.get('/', (req,res,next) => {
-  // res.status(200).json({
-  //   message:'Handling GET request to /products'
-  // })
-
   User.find()
+  .populate('room','name rent')
   .exec()
   .then(docs => {
+    console.log(docs)
     const response = {
       count:docs.length,
-      products: docs.map(item => {
-        return{
-          email:item.email,
-          _id: item._id,
-          request : {
-            type: 'GET',
-            url: 'http://localhost:4000/users/' + item._id
+      userInfo: docs.map(item => {
+          return{
+            name:item.name,
+            start_date: convertDate(item.start_date),
+            _id:item._id,
+            deposit:item.deposit,
+            roomInfo:item.room
           }
-        }
-      })
-    }
-
+        })
+      }
 
     if(docs.length > 0){
       res.status(200).json(response)
@@ -46,6 +44,60 @@ router.get('/', (req,res,next) => {
     })
   })
 })
+
+
+
+router.post('/', async (req, res, next) => {
+    Room.findById(req.body.roomId)
+    .then(room => {
+      if(!room){
+        return res.status(404).json({
+          message: 'Room not found'
+        })
+      }
+      console.log('hehe: ', req.body.startDate)
+      const user = new User({
+        _id:mongoose.Types.ObjectId(),
+        name: req.body.name,
+        room: req.body.roomId,
+        start_date: convertDate(req.body.startDate),
+
+      })
+
+
+      return user.save()
+    })
+
+    .then(result => {
+      console.log("\n")
+
+        console.log("result: ", result)
+        console.log("\n")
+        res.status(201).json({
+          message:'User Registered',
+          user:{
+            _id: result._id,
+            room: result.room,
+            name: result.name,
+            start_date:result.start_date,
+            deposit:result.deposit
+          },
+          request:{
+              type: 'GET',
+              url: 'http://localhost:3000/users/' + result._id
+          }
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        res.status(500).json({
+          error:err
+        })
+      })
+})
+
+
+// ------------------------------------------------------- NEW WORK
 
 
 router.post('/signup', (req, res, next) => {
@@ -87,8 +139,11 @@ router.post('/signup', (req, res, next) => {
   })
   })
 
+
+
+
+
   router.post('/login', (req,res,next) => {
-    console.log('yeah')
     User.find({email:req.body.email})
     .exec()
     .then(user => {
@@ -166,6 +221,35 @@ router.post('/signup', (req, res, next) => {
   //     })
   //   })
   // })
+
+  const convertDate = (e) => {
+    var d = new Date(e),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear(),
+    today = '' + d.getDay().toString();
+    var thisDay = "";
+    if(today == "1" ){
+      thisDay = "Mon"
+    }else if(today == "2"){
+      thisDay = "Tue"
+    }else if(today == "3"){
+      thisDay = "Wed"
+    }else if(today == "4"){
+      thisDay = "Thur"
+    }else if(today == "5"){
+      thisDay = "Fri"
+    }else if(today == "6"){
+      thisDay = "Sat"
+    }else{
+      thisDay = "Sun"
+    }
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return month + "-"+ day + "-"+ year;
+
+  }
 
 
 
