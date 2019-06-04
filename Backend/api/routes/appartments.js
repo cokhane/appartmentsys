@@ -42,26 +42,39 @@ router.get('/', (req,res,next) => {
 
 
 router.post('/', async (req, res, next) => {
+  console.log(req.body.address)
     const appartment = new Appartment({
       _id: new mongoose.Types.ObjectId(),
       name: req.body.name,
-      address: req.body.address,
-      owner: req.body.owner,
+      address:{
+        city:req.body.address.city,
+        street:req.body.address.street,
+        zipcode:req.body.address.zipCode,
+      }
     })
+    console.log('\n')
+    console.log('appartment: ',appartment)
+    console.log('\n')
+
+    appartment.save()
     .then(result => {
         res.status(201).json({
-          message:'User Registered',
-          user:{
-            _id: result._id,
-            address: result.address,
-            name: result.name,
-            owner:result.owner,
-          },
-          request:{
-              type: 'GET',
-              url: 'http://localhost:3000/users/' + result._id
-          }
+            message:'Appartment Registered',
+            user:result
         })
+        //   message:'User Registered',
+        //   user:{
+        //     _id: result._id,
+        //     address: result.address,
+        //     name: result.name,
+        //     owner:result.owner,
+        //   },
+        //   request:{
+        //       type: 'GET',
+        //       url: 'http://localhost:3000/users/' + result._id
+        //   }
+        // })
+
       })
       .catch(err => {
         console.log(err)
