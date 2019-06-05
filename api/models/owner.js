@@ -5,8 +5,8 @@ const ownerSchema = mongoose.Schema({
   appartment_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Appartment', required:true },
   name: String,
   date:{
-    start_date: Date,
-    end_date: Date,
+    start_date:   {type: Date, default: null},
+    end_date: {type: Date, default: null},
   },
   email: { type: String,
       required: true,
