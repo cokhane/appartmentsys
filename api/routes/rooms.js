@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Room = require('../models/room')
+const Appartment = require('../models/appartment')
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 
@@ -46,6 +47,8 @@ router.get('/', (req,res,next) => {
 
 
 router.post('/',  (req, res, next) => {
+    Appartment.findById(req.body.apaprtmentID)
+
     const room = new Room({
       _id: new mongoose.Types.ObjectId(),
       name: req.body.name,
@@ -53,8 +56,9 @@ router.post('/',  (req, res, next) => {
       water_rate: req.body.waterRate,
       electricity_rate: req.body.electricityRate,
       occupied: req.body.occupied,
-
     })
+
+    
     room.save()
     .then(result => {
       console.log('result: ', result)

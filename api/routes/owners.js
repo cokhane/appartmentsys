@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose')
 
+
+const Appartment = require('../models/appartment')
 const Owner = require('../models/owner')
 
 router.get('/', (req,res,next) => {
@@ -40,30 +42,41 @@ router.get('/', (req,res,next) => {
 })
 
 
-
 router.post('/', async (req, res, next) => {
-  console.log(req.body.address)
-    const owner = new Owner({
-      _id: new mongoose.Types.ObjectId(),
-      appartment_id:req.body.appartmentID,
-      name: req.body.name,
-      date:{
-        start_date:req.body.date.startDate,
-        end_date:req.body.date.endDate
-      },
-      email: req.body.email,
-      password: req.body.password,
-      address:{
-        city:req.body.address.city,
-        street:req.body.address.street,
-        zipcode:req.body.address.zipCode,
+    Appartment.findById(req.body.appartmentID)
+    .then(appartment => {
+      console.log(appartment)
+      if(!appartment){
+        return res.status(404).json({
+          message: 'Appartment not found'
+        })
       }
-    })
-    console.log('\n')
-    console.log('owner: ',owner)
-    console.log('\n')
+      const owner = new Owner({
+        _id: new mongoose.Types.ObjectId(),
+        appartment_id:req.body.appartmentID,
+        name: req.body.name,
+        date:{
+          start_date:req.body.date.startDate,
+          end_date:req.body.date.endDate
+        },
+        email: req.body.email,
+        password: req.body.password,
+        address:{
+          city:req.body.address.city,
+          street:req.body.address.street,
+          zipcode:req.body.address.zipCode,
+        }
+      })
+      console.log('\n')
+      console.log('owner: ',owner)
+      console.log('\n')
+      return owner.save()
 
-    owner.save()
+    }
+
+
+    )
+    // owner.save()
     .then(result => {
         res.status(201).json({
             message:'Owner Registered',

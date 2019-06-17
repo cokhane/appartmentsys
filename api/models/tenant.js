@@ -1,13 +1,12 @@
 const mongoose = require('mongoose')
 
-const userSchema = mongoose.Schema({
+const tenantSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
   room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required:true },
   water_rate:Number,
   electricity_rate:Number,
   name: String,
   start_date:  Date ,
-
   deposit: {
       rent: {
         type: Number,
@@ -20,4 +19,4 @@ const userSchema = mongoose.Schema({
   },
 })
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('Tenant', tenantSchema)
