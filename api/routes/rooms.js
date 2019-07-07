@@ -17,14 +17,17 @@ router.get('/', (req,res,next) => {
         return{
           _id:item._id,
           name:item.name,
-          rent:item.rent,
-          waterRate:item.water_rate,
-          electricity_rate: item.electricity_rate,
-          occupied: item.occupied,
-          request : {
-            type: 'GET',
-            url: 'http://localhost:4000/rooms/' + item._id
+          isOccupied: {
+            tenant:{
+              name:item.is_occupied.tenant.name,
+              start:item.is_occupied.tenant.start,
+            },
+            status: item.is_occupied.status,
           }
+          // request : {
+          //   type: 'GET',
+          //   url: 'http://localhost:4000/rooms/' + item._id
+          // }
         }
       })
     }
@@ -47,34 +50,45 @@ router.get('/', (req,res,next) => {
 
 
 router.post('/',  (req, res, next) => {
-    Appartment.findById(req.body.apaprtmentID)
+    Appartment.findById(req.body.appartment_id)
+    .exec()
+    .then(appartment_id =>{
+      if(!appartment_id){
+        return res.status(404).json({
+          message: 'Appartment ID not found'
+        })
+      }
 
-    const room = new Room({
-      _id: new mongoose.Types.ObjectId(),
-      name: req.body.name,
-      rent: req.body.rent,
-      water_rate: req.body.waterRate,
-      electricity_rate: req.body.electricityRate,
-      occupied: req.body.occupied,
+      const room = new Room({
+        _id: new mongoose.Types.ObjectId(),
+        name: req.body.name,
+        appartment_id:req.body.appartment_id,
+        is_occupied:{
+          status:req.body.isOccupied.status
+        }
+      })
+      return room.save()
+
     })
-
-    
-    room.save()
     .then(result => {
-      console.log('result: ', result)
+      console.log('result', result)
       res.status(201).json({
         message:'Room Created successfully',
         createdRoom: {
           _id:result._id,
+          appartment_id:result.appartment_id,
           name:result.name,
-          rent:result.rent,
-          waterRate:result.water_rate,
-          electricity_rate: result.electricity_rate,
-          occupied: result.occupied,
-          request:{
-            type: 'POST',
-            url: 'http://localhost:4000/rooms/' + result._id
+          isOccupied: {
+            tenant:{
+              name:result.is_occupied.tenant.name,
+              start:result.is_occupied.tenant.start,
+            },
+            status: result.is_occupied.status,
           }
+          // request:{
+          //   type: 'POST',
+          //   url: 'http://localhost:4000/rooms/' + result._id
+          // }
         }
       })
     })

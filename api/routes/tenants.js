@@ -4,8 +4,10 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-const User = require('../models/user')
 const Room = require('../models/room')
+const Tenant = require('../models/tenant')
+const Appartment = require('../models/appartment')
+
 
 router.get('/', (req,res,next) => {
   User.find()
@@ -45,44 +47,56 @@ router.get('/', (req,res,next) => {
 
 
 router.post('/', async (req, res, next) => {
-    Room.findById(req.body.roomId)
+  Appartment.findById(req.body.appartment_id)
+  .exec()
+  .then(appartment =>{
+    if(!appartment){
+      return res.status(404).json({
+        message: 'Appartment ID not found'
+      })
+    }
+    return Room.findById(req.body.room_id)
+    .exec()
     .then(room => {
       if(!room){
         return res.status(404).json({
-          message: 'Room not found'
+          message: 'Room ID not found'
         })
       }
-      console.log('hehe: ', req.body.startDate)
-      const user = new User({
-        _id:mongoose.Types.ObjectId(),
-        name: req.body.name,
-        room: req.body.roomId,
-        start_date: convertDate(req.body.startDate),
 
+      const tenants = new Tenant({
+        _id:mongoose.Types.ObjectId(),
+        room_id: req.body.room_id,
+        appartment_id: req.body.appartment_id,
+        name: req.body.name,
+        rent:req.body.rent,
+        water_rate:req.body.water_rate,
+        electricity_rate:req.body.electricity_rate,
+        start_date: req.body.start_date
       })
 
+       return tenants.save()
+    })
 
-      return user.save()
+
     })
 
     .then(result => {
-      console.log("\n")
-
-        console.log("result: ", result)
-        console.log("\n")
+      console.log('result: ',result)
         res.status(201).json({
-          message:'User Registered',
-          user:{
-            _id: result._id,
-            room: result.room,
-            name: result.name,
-            start_date:result.start_date,
-            deposit:result.deposit
-          },
-          request:{
-              type: 'GET',
-              url: 'http://localhost:3000/users/' + result._id
-          }
+          message:'Tenants Registered',
+          user:result
+          // user:{
+          //   _id: result._id,
+          //   room: result.room,
+          //   name: result.name,
+          //   start_date:result.start_date,
+          //   deposit:result.deposit
+          // },
+          // request:{
+          //     type: 'GET',
+          //     url: 'http://localhost:3000/users/' + result._id
+          // }
         })
       })
       .catch(err => {
